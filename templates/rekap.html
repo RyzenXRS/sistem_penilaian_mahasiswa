@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekap Nilai – IPPL UNEJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-badge">IPPL</span>
+        <div>
+          <p class="brand-title">Sistem Penilaian Mahasiswa</p>
+          <p class="brand-sub">Universitas Jember · 2025/2026</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="/" class="nav-link">Input Nilai</a>
+        <a href="/rekap" class="nav-link active">Rekap</a>
+        <a href="/aturan" class="nav-link">Aturan Penilaian</a>
+        <a href="/testing" class="nav-link">Hasil Testing</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content rekap-page">
+
+    <div class="rekap-header">
+      <div>
+        <h1>Rekapitulasi Nilai</h1>
+        <p class="rekap-sub">Total <strong>{{ daftar|length }}</strong> mahasiswa tersimpan di database.</p>
+      </div>
+      <div class="rekap-actions">
+        <a href="/" class="btn-primary">+ Input Mahasiswa Baru</a>
+        {% if daftar %}
+        <button class="btn-danger" onclick="hapusSemuaData()">Hapus Semua</button>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if not daftar %}
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>Belum ada data mahasiswa di database.</p>
+      <a href="/" class="btn-primary">Input Sekarang</a>
+    </div>
+    {% else %}
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      {% set lulus = daftar | selectattr("status", "equalto", "Lulus") | list | length %}
+      {% set tidak_lulus = daftar | length - lulus %}
+      {% set rata = (daftar | map(attribute='nilai_akhir') | sum) / daftar|length %}
+      <div class="stat-item">
+        <span class="stat-num">{{ daftar|length }}</span>
+        <span class="stat-lbl">Total Mahasiswa</span>
+      </div>
+      <div class="stat-item lulus">
+        <span class="stat-num">{{ lulus }}</span>
+        <span class="stat-lbl">Lulus</span>
+      </div>
+      <div class="stat-item gagal">
+        <span class="stat-num">{{ tidak_lulus }}</span>
+        <span class="stat-lbl">Tidak Lulus</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">{{ "%.2f"|format(rata) }}</span>
+        <span class="stat-lbl">Rata-rata NA</span>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="rekap-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>NIM</th>
+            <th>Nama</th>
+            <th>Tugas</th>
+            <th>Kuis</th>
+            <th>Aktif</th>
+            <th>Hadir</th>
+            <th>UTS</th>
+            <th>UAS</th>
+            <th>NA</th>
+            <th>Grade</th>
+            <th>Status</th>
+            <th>Remedial</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in daftar %}
+          <tr id="row-{{ h.id }}" class="grade-row-{{ h.grade|lower }}">
+            <td>{{ loop.index }}</td>
+            <td class="mono">{{ h.nim }}</td>
+            <td><strong>{{ h.nama }}</strong></td>
+            <td class="mono">{{ "%.1f"|format(h.tugas) }}</td>
+            <td class="mono">{{ "%.1f"|format(h.kuis) }}</td>
+            <td class="mono">{{ "%.1f"|format(h.keaktifan) }}</td>
+            <td class="mono">{{ "%.1f"|format(h.kehadiran) }}</td>
+            <td class="mono">{{ "%.1f"|format(h.uts) }}</td>
+            <td class="mono">{{ "%.1f"|format(h.uas) }}</td>
+            <td class="mono na-col"><strong>{{ "%.2f"|format(h.nilai_akhir) }}</strong></td>
+            <td><span class="grade-pill grade-{{ h.grade|lower }}">{{ h.grade }}</span></td>
+            <td>
+              <span class="status-pill {% if h.status == 'Lulus' %}lulus{% else %}gagal{% endif %}">
+                {{ h.status }}
+              </span>
+            </td>
+            <td>
+              <span class="remedial-pill {% if h.remedial.startswith('Perlu') %}remedial{% else %}ok{% endif %}">
+                {{ h.remedial }}
+              </span>
+            </td>
+            <td class="mono" style="font-size:11px; color:var(--text-muted);">{{ h.created_at }}</td>
+            <td>
+              <button class="btn-hapus-row" onclick="hapusSatu('{{ h.id }}')">✕</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% endif %}
+  </main>
+
+  <footer class="site-footer">
+    <p>Kelompok 4 · IPPL Universitas Jember 2025/2026</p>
+    <p>Ahmad Robi Faro'id · Rivat Defriyanto · Damar Wulan · Wildan Ahmad · Rio Rhespaty</p>
+  </footer>
+
+  <script>
+    async function hapusSatu(id) {
+      if (!confirm("Hapus data mahasiswa ini?")) return;
+      const resp = await fetch(`/rekap/hapus/${id}`, { method: "POST" });
+      const json = await resp.json();
+      if (json.success) {
+        document.getElementById(`row-${id}`)?.remove();
+      } else {
+        alert("Gagal menghapus: " + (json.error || "unknown error"));
+      }
+    }
+
+    async function hapusSemuaData() {
+      if (!confirm("Yakin ingin menghapus SEMUA data dari database? Tidak bisa dibatalkan.")) return;
+      const resp = await fetch("/rekap/hapus-semua", { method: "POST" });
+      const json = await resp.json();
+      if (json.success) location.reload();
+      else alert("Gagal menghapus: " + (json.error || "unknown error"));
+    }
+  </script>
+</body>
+</html>

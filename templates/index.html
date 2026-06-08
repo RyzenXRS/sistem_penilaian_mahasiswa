@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Penilaian Mahasiswa – IPPL UNEJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-badge">IPPL</span>
+        <div>
+          <p class="brand-title">Sistem Penilaian Mahasiswa</p>
+          <p class="brand-sub">Universitas Jember · 2025/2026</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="/" class="nav-link active">Input Nilai</a>
+        <a href="/rekap" class="nav-link">Rekap</a>
+        <a href="/aturan" class="nav-link">Aturan Penilaian</a>
+        <a href="/testing" class="nav-link">Hasil Testing</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero hero--slim">
+    <p class="hero-label">Decision Table Testing · Kelompok 4</p>
+    <h1>Input Nilai <em>Mahasiswa</em></h1>
+    <p class="hero-desc">Masukkan enam komponen nilai. Sistem akan menghitung nilai akhir, grade, status kelulusan, dan rekomendasi remedial secara otomatis.</p>
+  </section>
+
+  <main class="main-content">
+
+    <div class="form-card">
+      <h2 class="form-title">Data Mahasiswa</h2>
+
+      <form id="formNilai" novalidate>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="nim">NIM</label>
+            <input type="text" id="nim" name="nim" placeholder="cth. 242410103044" required />
+          </div>
+          <div class="field-group">
+            <label for="nama">Nama Lengkap</label>
+            <input type="text" id="nama" name="nama" placeholder="ex. Bintang Raja Python" required />
+          </div>
+        </div>
+
+        <div class="section-divider">Komponen Nilai (0 – 100)</div>
+
+        <div class="nilai-grid">
+          <div class="field-group">
+            <label for="tugas">Nilai Tugas</label>
+            <input type="number" id="tugas" name="tugas" min="0" max="100" step="0.01" placeholder="0 – 100" required />
+          </div>
+          <div class="field-group">
+            <label for="kuis">Nilai Kuis</label>
+            <input type="number" id="kuis" name="kuis" min="0" max="100" step="0.01" placeholder="0 – 100" required />
+          </div>
+          <div class="field-group">
+            <label for="keaktifan">Keaktifan</label>
+            <input type="number" id="keaktifan" name="keaktifan" min="0" max="100" step="0.01" placeholder="0% - 100%" required />
+          </div>
+          <div class="field-group">
+            <label for="kehadiran">Kehadiran</label>
+            <input type="number" id="kehadiran" name="kehadiran" min="0" max="100" step="0.01" placeholder="0% - 100%" required />
+          </div>
+          <div class="field-group">
+            <label for="uts">Nilai UTS</label>
+            <input type="number" id="uts" name="uts" min="0" max="100" step="0.01" placeholder="0 – 100" required />
+          </div>
+          <div class="field-group">
+            <label for="uas">Nilai UAS</label>
+            <input type="number" id="uas" name="uas" min="0" max="100" step="0.01" placeholder="0 – 100" required />
+          </div>
+        </div>
+
+        <div id="errorMsg" class="error-banner" style="display:none;"></div>
+
+        <button type="submit" class="btn-hitung" id="btnHitung">
+          <span class="btn-text">Hitung Nilai Akhir</span>
+          <span class="btn-loader" style="display:none;">Menghitung…</span>
+        </button>
+
+      </form>
+    </div>
+
+    <div id="resultPanel" class="result-panel" style="display:none;">
+      <div class="result-header">
+        <h2>Hasil Penilaian</h2>
+        <button class="btn-close" onclick="tutupHasil()">✕</button>
+      </div>
+
+      <div class="result-identity">
+        <p><span>NIM</span><strong id="r-nim">–</strong></p>
+        <p><span>Nama</span><strong id="r-nama">–</strong></p>
+      </div>
+
+      <div class="result-score-big">
+        <div class="score-circle" id="scoreCircle">
+          <span class="score-number" id="r-na">–</span>
+          <span class="score-label">Nilai Akhir</span>
+        </div>
+        <div class="score-meta">
+          <div class="grade-box" id="gradeBox">
+            <span class="grade-letter" id="r-grade">–</span>
+            <span class="grade-desc" id="r-predikat">–</span>
+          </div>
+          <div class="status-chip" id="statusChip">
+            <span id="r-status">–</span>
+          </div>
+          <div class="remedial-chip" id="remedialChip">
+            <span id="r-remedial">–</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-breakdown">
+        <p class="breakdown-title">Rincian Komponen</p>
+        <div class="breakdown-bars" id="breakdownBars"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-secondary" onclick="tutupHasil()">Input Mahasiswa Baru</button>
+        <a href="/rekap" class="btn-primary">Lihat Rekap Semua</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Kelompok 4 · IPPL Universitas Jember 2025/2026</p>
+    <p>Ahmad Robi Faro'id · Rivat Defriyanto · Damar Wulan · Wildan Ahmad · Rio Rhespaty</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aturan Penilaian – IPPL UNEJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-badge">IPPL</span>
+        <div>
+          <p class="brand-title">Sistem Penilaian Mahasiswa</p>
+          <p class="brand-sub">Universitas Jember · 2025/2026</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="/"        class="nav-link">Input Nilai</a>
+        <a href="/rekap"   class="nav-link">Rekap</a>
+        <a href="/aturan"  class="nav-link active">Aturan Penilaian</a>
+        <a href="/testing" class="nav-link">Hasil Testing</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content aturan-page">
+
+    <div class="aturan-heading">
+      <p class="hero-label">Kelompok 4 · Decision Table Testing</p>
+      <h1>Aturan <em>Penilaian</em></h1>
+      <p class="hero-desc">Dokumentasi lengkap formula, bobot, dan decision table yang digunakan sistem. Grade mengacu pada <strong>Pedoman Penyelenggaraan Pendidikan UNEJ No.17 Th.2021 (Tabel 4.2)</strong> dengan 9 tingkat grade: A, AB, B, BC, C, CD, D, DE, E.</p>
+    </div>
+
+    <!-- 01 Formula -->
+    <section class="aturan-section">
+      <div class="aturan-section-label">01</div>
+      <h2 class="aturan-section-title">Formula Nilai Akhir</h2>
+      <p class="aturan-desc">Nilai akhir dihitung sebagai jumlah tertimbang dari enam komponen penilaian. Total bobot selalu sama dengan <strong>100%</strong>.</p>
+      <div class="formula-box">
+        <code>NA = (Tugas × 0.10) + (Kuis × 0.20) + (Keaktifan × 0.05) + (Kehadiran × 0.05) + (UTS × 0.30) + (UAS × 0.30)</code>
+      </div>
+      <div class="bobot-table-wrap">
+        <table class="aturan-table">
+          <thead>
+            <tr><th>Komponen</th><th>Bobot</th><th>Konstanta</th><th>Rentang Input</th><th>Kontribusi Maks.</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Tugas</strong></td><td><span class="pill-blue">10%</span></td><td class="mono">0.10</td><td class="mono">0 – 100</td><td class="mono">10.00</td></tr>
+            <tr><td><strong>Kuis</strong></td><td><span class="pill-blue">20%</span></td><td class="mono">0.20</td><td class="mono">0 – 100</td><td class="mono">20.00</td></tr>
+            <tr><td><strong>Keaktifan</strong></td><td><span class="pill-blue">5%</span></td><td class="mono">0.05</td><td class="mono">0 – 100</td><td class="mono">5.00</td></tr>
+            <tr><td><strong>Kehadiran</strong></td><td><span class="pill-blue">5%</span></td><td class="mono">0.05</td><td class="mono">0 – 100</td><td class="mono">5.00</td></tr>
+            <tr><td><strong>UTS</strong></td><td><span class="pill-blue-dark">30%</span></td><td class="mono">0.30</td><td class="mono">0 – 100</td><td class="mono">30.00</td></tr>
+            <tr><td><strong>UAS</strong></td><td><span class="pill-blue-dark">30%</span></td><td class="mono">0.30</td><td class="mono">0 – 100</td><td class="mono">30.00</td></tr>
+            <tr class="row-total"><td><strong>Total</strong></td><td><span class="pill-blue-dark">100%</span></td><td class="mono">1.00</td><td class="mono">–</td><td class="mono"><strong>100.00</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 02 Decision Table -->
+    <section class="aturan-section">
+      <div class="aturan-section-label">02</div>
+      <h2 class="aturan-section-title">Decision Table – Grade UNEJ (R1–R9)</h2>
+      <p class="aturan-desc">Sistem menggunakan 9 aturan (R1–R9) mengacu pada Pedoman UNEJ No.17 Th.2021. Setiap rentang bersifat mutually exclusive dan collectively exhaustive mencakup seluruh domain [0, 100]. Perhatikan: grade <strong>C</strong> berstatus <em>Lulus</em> namun tetap <em>Perlu Remedial</em>.</p>
+      <div class="table-scroll">
+        <table class="aturan-table dt-full">
+          <thead>
+            <tr><th>Rule</th><th>Kondisi: Rentang NA</th><th>Grade</th><th>Status</th><th>Predikat</th><th>Remedial</th></tr>
+          </thead>
+          <tbody>
+            <tr class="dt-row-a">
+              <td><span class="rule-badge">R1</span></td>
+              <td class="mono"><strong>87.50 ≤ NA ≤ 100.00</strong></td>
+              <td><span class="grade-pill grade-a">A</span></td>
+              <td><span class="status-pill lulus">Lulus</span></td>
+              <td>Istimewa</td>
+              <td><span class="remedial-pill ok">Tidak Perlu</span></td>
+            </tr>
+            <tr class="dt-row-ab">
+              <td><span class="rule-badge">R2</span></td>
+              <td class="mono"><strong>75.00 ≤ NA &lt; 87.50</strong></td>
+              <td><span class="grade-pill grade-ab">AB</span></td>
+              <td><span class="status-pill lulus">Lulus</span></td>
+              <td>Sangat Baik</td>
+              <td><span class="remedial-pill ok">Tidak Perlu</span></td>
+            </tr>
+            <tr class="dt-row-b">
+              <td><span class="rule-badge">R3</span></td>
+              <td class="mono"><strong>62.50 ≤ NA &lt; 75.00</strong></td>
+              <td><span class="grade-pill grade-b">B</span></td>
+              <td><span class="status-pill lulus">Lulus</span></td>
+              <td>Baik</td>
+              <td><span class="remedial-pill ok">Tidak Perlu</span></td>
+            </tr>
+            <tr class="dt-row-bc">
+              <td><span class="rule-badge">R4</span></td>
+              <td class="mono"><strong>56.25 ≤ NA &lt; 62.50</strong></td>
+              <td><span class="grade-pill grade-bc">BC</span></td>
+              <td><span class="status-pill lulus">Lulus</span></td>
+              <td>Cukup Baik</td>
+              <td><span class="remedial-pill ok">Tidak Perlu</span></td>
+            </tr>
+            <tr class="dt-row-c">
+              <td><span class="rule-badge">R5</span></td>
+              <td class="mono"><strong>50.00 ≤ NA &lt; 56.25</strong></td>
+              <td><span class="grade-pill grade-c">C</span></td>
+              <td><span class="status-pill lulus">Lulus</span></td>
+              <td>Cukup</td>
+              <td><span class="remedial-pill remedial">Perlu Remedial</span></td>
+            </tr>
+            <tr class="dt-row-cd">
+              <td><span class="rule-badge">R6</span></td>
+              <td class="mono"><strong>43.75 ≤ NA &lt; 50.00</strong></td>
+              <td><span class="grade-pill grade-cd">CD</span></td>
+              <td><span class="status-pill gagal">Tidak Lulus</span></td>
+              <td>Kurang Cukup</td>
+              <td><span class="remedial-pill remedial">Perlu Remedial</span></td>
+            </tr>
+            <tr class="dt-row-d">
+              <td><span class="rule-badge">R7</span></td>
+              <td class="mono"><strong>37.50 ≤ NA &lt; 43.75</strong></td>
+              <td><span class="grade-pill grade-d">D</span></td>
+              <td><span class="status-pill gagal">Tidak Lulus</span></td>
+              <td>Kurang</td>
+              <td><span class="remedial-pill remedial">Perlu Remedial</span></td>
+            </tr>
+            <tr class="dt-row-de">
+              <td><span class="rule-badge">R8</span></td>
+              <td class="mono"><strong>18.75 ≤ NA &lt; 37.50</strong></td>
+              <td><span class="grade-pill grade-de">DE</span></td>
+              <td><span class="status-pill gagal">Tidak Lulus</span></td>
+              <td>Sangat Kurang</td>
+              <td><span class="remedial-pill remedial">Perlu Remedial</span></td>
+            </tr>
+            <tr class="dt-row-e">
+              <td><span class="rule-badge">R9</span></td>
+              <td class="mono"><strong>0.00 ≤ NA &lt; 18.75</strong></td>
+              <td><span class="grade-pill grade-e">E</span></td>
+              <td><span class="status-pill gagal">Tidak Lulus</span></td>
+              <td>Tidak Memenuhi Syarat</td>
+              <td><span class="remedial-pill remedial">Perlu Remedial</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 03 Matrix -->
+    <section class="aturan-section">
+      <div class="aturan-section-label">03</div>
+      <h2 class="aturan-section-title">Ringkasan Kondisi &amp; Aksi</h2>
+      <p class="aturan-desc">Matriks kondisi/aksi yang memperjelas relasi antar 9 aturan. T = True, F = False.</p>
+      <div class="table-scroll">
+        <table class="aturan-table matrix-table">
+          <thead>
+            <tr>
+              <th>Kondisi / Aksi</th>
+              <th><span class="rule-badge">R1</span></th><th><span class="rule-badge">R2</span></th><th><span class="rule-badge">R3</span></th>
+              <th><span class="rule-badge">R4</span></th><th><span class="rule-badge">R5</span></th><th><span class="rule-badge">R6</span></th>
+              <th><span class="rule-badge">R7</span></th><th><span class="rule-badge">R8</span></th><th><span class="rule-badge">R9</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="matrix-label">NA ≥ 87.50</td>            <td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">75.00 ≤ NA &lt; 87.50</td> <td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">62.50 ≤ NA &lt; 75.00</td> <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">56.25 ≤ NA &lt; 62.50</td> <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">50.00 ≤ NA &lt; 56.25</td> <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">43.75 ≤ NA &lt; 50.00</td> <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">37.50 ≤ NA &lt; 43.75</td> <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">18.75 ≤ NA &lt; 37.50</td> <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td><td class="matrix-no">F</td></tr>
+            <tr><td class="matrix-label">0.00 ≤ NA &lt; 18.75</td>  <td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-no">F</td><td class="matrix-yes">T</td></tr>
+            <tr class="matrix-divider"><td colspan="10" class="matrix-section-label">Aksi</td></tr>
+            <tr><td class="matrix-label">Status = Lulus</td>        <td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+            <tr><td class="matrix-label">Status = Tidak Lulus</td>  <td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td></tr>
+            <tr><td class="matrix-label">Perlu Remedial</td>        <td>–</td><td>–</td><td>–</td><td>–</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td><td class="matrix-no">✓</td></tr>
+            <tr><td class="matrix-label">Tidak Perlu Remedial</td>  <td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td class="matrix-yes">✓</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 04 Validasi -->
+    <section class="aturan-section">
+      <div class="aturan-section-label">04</div>
+      <h2 class="aturan-section-title">Aturan Validasi Input</h2>
+      <p class="aturan-desc">Sistem melakukan validasi menyeluruh sebelum perhitungan. Semua pesan error ditampilkan sekaligus.</p>
+      <div class="table-scroll">
+        <table class="aturan-table">
+          <thead>
+            <tr><th>Field</th><th>Tipe</th><th>Rentang Valid</th><th>Kondisi Tidak Valid</th><th>Pesan Error</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>NIM</strong></td><td class="mono">string</td><td>Tidak kosong</td><td>String kosong / whitespace</td><td class="mono" style="font-size:11px;">NIM tidak boleh kosong.</td></tr>
+            <tr><td><strong>Nama</strong></td><td class="mono">string</td><td>Tidak kosong</td><td>String kosong / whitespace</td><td class="mono" style="font-size:11px;">Nama tidak boleh kosong.</td></tr>
+            <tr><td><strong>Semua Nilai</strong></td><td class="mono">float</td><td>0.00 – 100.00</td><td>Bukan angka (NaN)</td><td class="mono" style="font-size:11px;">{Komponen} harus berupa angka.</td></tr>
+            <tr><td><strong>Semua Nilai</strong></td><td class="mono">float</td><td>0.00 – 100.00</td><td>Nilai &lt; 0</td><td class="mono" style="font-size:11px;">{Komponen} tidak boleh negatif.</td></tr>
+            <tr><td><strong>Semua Nilai</strong></td><td class="mono">float</td><td>0.00 – 100.00</td><td>Nilai &gt; 100</td><td class="mono" style="font-size:11px;">{Komponen} tidak boleh lebih dari 100.</td></tr>
+            <tr><td><strong>Semua Nilai</strong></td><td class="mono">float</td><td>0.00 – 100.00</td><td>Infinity / NaN</td><td class="mono" style="font-size:11px;">{Komponen} tidak boleh NaN atau Infinity.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Kelompok 4 · IPPL Universitas Jember 2025/2026</p>
+    <p>Ahmad Robi Faro'id · Rivat Defriyanto · Damar Wulan · Wildan Ahmad · Rio Rhespaty</p>
+  </footer>
+</body>
+</html>

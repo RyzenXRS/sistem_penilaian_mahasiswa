@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hasil Testing – IPPL UNEJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    .testing-page { display:block!important; padding-top:0!important; padding-bottom:56px; }
+    .testing-heading { padding:48px 0 28px; }
+    .testing-heading h1 { font-size:clamp(26px,4vw,40px); font-weight:700; line-height:1.15; letter-spacing:-.025em; color:var(--text); margin-bottom:10px; }
+    .testing-heading h1 em { font-style:normal; color:var(--blue); }
+
+    /* ── Run button ── */
+    .run-btn {
+      display:inline-flex; align-items:center; gap:10px;
+      padding:12px 28px; background:var(--blue); color:#fff;
+      border:none; border-radius:var(--radius); font-size:14px; font-weight:600;
+      cursor:pointer; transition:opacity .2s; font-family:var(--font-mono);
+      letter-spacing:.02em;
+    }
+    .run-btn:hover { opacity:.85; }
+    .run-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .run-btn .spinner {
+      width:16px; height:16px; border:2px solid rgba(255,255,255,.3);
+      border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; display:none;
+    }
+    .run-btn.loading .spinner { display:block; }
+    .run-btn.loading .btn-icon { display:none; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Summary cards ── */
+    .test-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    @media(max-width:700px){ .test-summary{grid-template-columns:1fr 1fr;} }
+    .ts-card {
+      background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg);
+      padding:20px 20px 16px; box-shadow:var(--shadow-sm);
+      transition: opacity .3s;
+    }
+    .ts-card .ts-num { font-size:32px; font-weight:700; letter-spacing:-.03em; line-height:1; margin-bottom:6px; }
+    .ts-card .ts-lbl { font-size:11px; font-weight:600; color:var(--text-muted); letter-spacing:.08em; text-transform:uppercase; font-family:var(--font-mono); }
+    .ts-card.passed .ts-num { color:#1A7A4A; }
+    .ts-card.failed .ts-num { color:#B01010; }
+    .ts-card.total  .ts-num { color:var(--blue); }
+    .ts-card.dur    .ts-num { color:var(--text-mid); font-size:24px; }
+
+    /* ── Progress bar ── */
+    .test-progress-wrap { background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px 24px; margin-bottom:24px; box-shadow:var(--shadow-sm); }
+    .tp-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .tp-title  { font-size:13px; font-weight:600; color:var(--text); }
+    .tp-pct    { font-family:var(--font-mono); font-size:13px; font-weight:600; color:#1A7A4A; }
+    .tp-bar    { height:10px; background:var(--cream2); border-radius:99px; overflow:hidden; }
+    .tp-fill   { height:100%; background:#1A7A4A; border-radius:99px; transition:width .8s ease; width:0; }
+
+    /* ── Class tabs ── */
+    .class-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+    .tab-btn {
+      padding:6px 14px; border-radius:6px; border:1px solid var(--border);
+      font-size:12px; font-weight:600; font-family:var(--font-mono);
+      cursor:pointer; background:#fff; color:var(--text-mid); transition:all .15s;
+    }
+    .tab-btn:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-pale); }
+    .tab-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+    /* ── Test class card ── */
+    .test-class-card {
+      background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg);
+      margin-bottom:16px; box-shadow:var(--shadow-sm); overflow:hidden;
+    }
+    .tcc-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; border-bottom:1px solid var(--border-light);
+      cursor:pointer; user-select:none;
+    }
+    .tcc-header:hover { background:var(--cream); }
+    .tcc-left { display:flex; align-items:center; gap:10px; }
+    .tcc-badge { font-family:var(--font-mono); font-size:11px; font-weight:600; padding:3px 10px; border-radius:5px; }
+    .tcc-badge.pass { background:rgba(26,122,74,.12); color:#1A7A4A; }
+    .tcc-badge.fail { background:rgba(176,16,16,.10); color:#B01010; }
+    .tcc-name  { font-size:14px; font-weight:700; color:var(--text); letter-spacing:-.01em; }
+    .tcc-desc  { font-size:12px; color:var(--text-muted); margin-top:1px; }
+    .tcc-count { font-family:var(--font-mono); font-size:12px; color:var(--text-muted); }
+    .tcc-arrow { font-size:12px; color:var(--text-muted); transition:transform .2s; }
+    .tcc-header.open .tcc-arrow { transform:rotate(180deg); }
+
+    /* ── Test rows ── */
+    .tcc-body { display:none; }
+    .tcc-body.open { display:block; }
+
+    .test-row {
+      display:grid;
+      grid-template-columns: 26px 1fr minmax(140px,200px) 70px 56px;
+      align-items:start; gap:10px;
+      padding:10px 20px;
+      border-bottom:1px solid var(--border-light);
+      font-size:13px;
+      animation: fadeIn .2s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+    .test-row:last-child { border-bottom:none; }
+    .test-row:hover { background:var(--cream); }
+
+    .tr-icon { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; margin-top:2px; }
+    .tr-icon.pass { background:rgba(26,122,74,.12); color:#1A7A4A; }
+    .tr-icon.fail { background:rgba(176,16,16,.10); color:#B01010; }
+
+    .tr-name { font-family:var(--font-mono); font-size:12px; color:var(--text); line-height:1.5; }
+    .tr-name small { display:block; font-family:var(--font-sans); font-size:11px; color:var(--text-muted); font-style:italic; margin-top:2px; line-height:1.4; }
+
+    .tr-detail { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); line-height:1.6; }
+    .tr-detail .lbl { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); opacity:.7; display:block; }
+    .tr-detail .val { color:var(--text); }
+    .tr-detail .exp { color:var(--blue); font-weight:600; }
+
+    .tr-dur { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); text-align:right; white-space:nowrap; padding-top:3px; }
+
+    .tr-status { font-size:11px; font-weight:700; font-family:var(--font-mono); white-space:nowrap; padding:2px 8px; border-radius:4px; align-self:start; }
+    .tr-status.pass { background:rgba(26,122,74,.10); color:#1A7A4A; }
+    .tr-status.fail { background:rgba(176,16,16,.08); color:#B01010; }
+
+    /* error detail */
+    .tr-error {
+      grid-column: 1/-1; margin-top:4px; padding:10px 14px;
+      background:rgba(176,16,16,.05); border:1px solid rgba(176,16,16,.15);
+      border-radius:6px; font-family:var(--font-mono); font-size:11px;
+      color:#8B0000; white-space:pre-wrap; line-height:1.6;
+    }
+
+    /* ── Env bar ── */
+    .env-bar { background:var(--cream); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:20px; display:flex; gap:32px; flex-wrap:wrap; }
+    .env-item { display:flex; flex-direction:column; gap:2px; }
+    .env-key  { font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; }
+    .env-val  { font-family:var(--font-mono); font-size:13px; font-weight:600; color:var(--text); }
+
+    /* ── State panels ── */
+    .state-panel { background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg); padding:48px 32px; text-align:center; box-shadow:var(--shadow-sm); margin-bottom:24px; }
+    .state-icon  { font-size:40px; margin-bottom:12px; }
+    .state-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+    .state-sub   { font-size:13px; color:var(--text-muted); line-height:1.6; }
+
+    /* error panel */
+    .error-panel { background:#fff; border:1px solid rgba(176,16,16,.25); border-radius:var(--radius-lg); padding:28px; margin-bottom:24px; box-shadow:var(--shadow-sm); }
+    .error-panel h3 { color:#B01010; font-size:15px; margin-bottom:10px; }
+    .error-panel pre { font-size:12px; font-family:var(--font-mono); color:#555; white-space:pre-wrap; background:var(--cream); padding:14px; border-radius:6px; overflow:auto; max-height:300px; }
+
+    /* terminal output */
+    .terminal-wrap { background:#1a1a2e; border-radius:var(--radius-lg); padding:20px 24px; margin-top:20px; }
+    .terminal-wrap h3 { color:rgba(255,255,255,.5); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; font-family:var(--font-mono); }
+    .terminal-out  { font-family:var(--font-mono); font-size:12px; color:#a8e6cf; white-space:pre-wrap; line-height:1.7; max-height:320px; overflow:auto; }
+    .terminal-out .t-pass { color:#6bcf8f; }
+    .terminal-out .t-fail { color:#ff7675; }
+    .terminal-out .t-warn { color:#ffeaa7; }
+
+    /* hidden initially */
+    #summarySection, #tabsSection, #cardsSection, #terminalSection { display:none; }
+    #placeholderSection { display:block; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-badge">IPPL</span>
+        <div>
+          <p class="brand-title">Sistem Penilaian Mahasiswa</p>
+          <p class="brand-sub">Universitas Jember · 2025/2026</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="/"        class="nav-link">Input Nilai</a>
+        <a href="/rekap"   class="nav-link">Rekap</a>
+        <a href="/aturan"  class="nav-link">Aturan Penilaian</a>
+        <a href="/testing" class="nav-link active">Hasil Testing</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content testing-page">
+
+    <div class="testing-heading">
+      <p class="hero-label">Kelompok 4 · Decision Table Testing</p>
+      <h1>Laporan <em>Hasil Pytest</em></h1>
+      <p class="hero-desc">
+        Klik tombol di bawah untuk menjalankan seluruh test case secara langsung menggunakan <strong>pytest</strong>.
+        Hasil ditampilkan otomatis lengkap dengan rincian setiap test case setelah pengujian selesai.
+      </p>
+      <button class="run-btn" id="runBtn" onclick="jalankanPytest()">
+        <span class="btn-icon">▶</span>
+        <div class="spinner"></div>
+        <span class="btn-label">Testing pytest</span>
+      </button>
+    </div>
+
+    <!-- Placeholder sebelum run -->
+    <div id="placeholderSection">
+      <div class="state-panel">
+        <div class="state-title">Belum ada hasil pengujian</div>
+        <div class="state-sub">Klik tombol <strong>Jalankan pytest</strong> di atas untuk menjalankan 107 test case secara langsung.</div>
+      </div>
+    </div>
+
+    <!-- Error panel -->
+    <div id="errorSection" style="display:none;">
+      <div class="error-panel">
+        <h3>⚠ Terjadi kesalahan saat menjalankan pytest</h3>
+        <pre id="errorMsg"></pre>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div id="summarySection">
+      <div class="test-summary">
+        <div class="ts-card total">
+          <div class="ts-num" id="s-total">–</div>
+          <div class="ts-lbl">Total Test</div>
+        </div>
+        <div class="ts-card passed">
+          <div class="ts-num" id="s-passed">–</div>
+          <div class="ts-lbl">Passed ✓</div>
+        </div>
+        <div class="ts-card failed">
+          <div class="ts-num" id="s-failed">–</div>
+          <div class="ts-lbl">Failed ✗</div>
+        </div>
+        <div class="ts-card dur">
+          <div class="ts-num" id="s-dur">–</div>
+          <div class="ts-lbl">Durasi</div>
+        </div>
+      </div>
+
+      <div class="test-progress-wrap">
+        <div class="tp-header">
+          <span class="tp-title">Pass Rate</span>
+          <span class="tp-pct" id="s-pct">–</span>
+        </div>
+        <div class="tp-bar"><div class="tp-fill" id="tp-fill"></div></div>
+      </div>
+
+      <!-- Env bar -->
+      <div class="env-bar" id="envBar">
+        <div class="env-item"><span class="env-key">Platform</span><span class="env-val" id="e-platform">–</span></div>
+        <div class="env-item"><span class="env-key">Python</span><span class="env-val" id="e-python">–</span></div>
+        <div class="env-item"><span class="env-key">pytest</span><span class="env-val" id="e-pytest">–</span></div>
+        <div class="env-item"><span class="env-key">Modul Diuji</span><span class="env-val">penilaian_mahasiswa.py</span></div>
+        <div class="env-item"><span class="env-key">Metode</span><span class="env-val">Decision Table + BVA</span></div>
+        <div class="env-item"><span class="env-key">Exit Code</span><span class="env-val" id="e-exit">–</span></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div id="tabsSection">
+      <div class="class-tabs" id="classTabs"></div>
+    </div>
+
+    <!-- Test class cards -->
+    <div id="cardsSection"></div>
+
+    <!-- Terminal output -->
+    <div id="terminalSection">
+      <div class="terminal-wrap">
+        <h3>Terminal Output (pytest -v)</h3>
+        <div class="terminal-out" id="terminalOut"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Kelompok 4 · IPPL Universitas Jember 2025/2026</p>
+    <p>Ahmad Robi Faro'id · Rivat Defriyanto · Damar Wulan · Wildan Ahmad · Rio Rhespaty</p>
+  </footer>
+
+<script>
+// ── Jalankan pytest via Flask endpoint ────────────────────────────────────────
+async function jalankanPytest() {
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true;
+  btn.classList.add("loading");
+  btn.querySelector(".btn-label").textContent = "Menjalankan pytest…";
+
+  // Sembunyikan semua section, tampilkan placeholder loading
+  ["summarySection","tabsSection","cardsSection","terminalSection","errorSection"]
+    .forEach(id => document.getElementById(id).style.display = "none");
+  document.getElementById("placeholderSection").style.display = "block";
+  document.getElementById("placeholderSection").innerHTML = `
+    <div class="state-panel">
+      <div class="state-icon">⏳</div>
+      <div class="state-title">Menjalankan pytest…</div>
+      <div class="state-sub">Mohon tunggu, sedang mengeksekusi seluruh test case.</div>
+    </div>`;
+
+  try {
+    const resp = await fetch("/testing/run", { method: "POST" });
+    const data = await resp.json();
+
+    if (!data.success) {
+      showError(data.error || "Unknown error");
+      return;
+    }
+
+    renderHasil(data);
+
+  } catch (err) {
+    showError("Gagal menghubungi server: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("loading");
+    btn.querySelector(".btn-label").textContent = "Jalankan Ulang";
+  }
+}
+
+// ── Tampilkan error ────────────────────────────────────────────────────────────
+function showError(msg) {
+  document.getElementById("placeholderSection").style.display = "none";
+  document.getElementById("errorSection").style.display = "block";
+  document.getElementById("errorMsg").textContent = msg;
+}
+
+// ── Render semua hasil ─────────────────────────────────────────────────────────
+function renderHasil(data) {
+  document.getElementById("placeholderSection").style.display = "none";
+
+  const summ   = data.summary || {};
+  const passed = summ.passed  || 0;
+  const failed = (summ.failed || 0) + (summ.error || 0);
+  const total  = summ.total   || data.tests.length;
+  const pct    = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+  // Summary cards
+  document.getElementById("s-total").textContent  = total;
+  document.getElementById("s-passed").textContent = passed;
+  document.getElementById("s-failed").textContent = failed;
+  document.getElementById("s-dur").textContent     = data.duration + "s";
+  document.getElementById("s-pct").textContent     = `${passed} / ${total} — ${pct}%`;
+  document.getElementById("s-pct").style.color     = failed > 0 ? "#B01010" : "#1A7A4A";
+  setTimeout(() => {
+    document.getElementById("tp-fill").style.width = pct + "%";
+    document.getElementById("tp-fill").style.background = failed > 0 ? "#B01010" : "#1A7A4A";
+  }, 100);
+
+  // Env info dari terminal output
+  const termText = data.terminal_output || "";
+  const pyMatch  = termText.match(/Python\s+([\d.]+)/i);
+  const ptMatch  = termText.match(/pytest[\s-]+([\d.]+)/i) || termText.match(/pytest\s+([\d.]+)/);
+  document.getElementById("e-python").textContent   = pyMatch  ? pyMatch[1]  : detectPythonVersion(termText);
+  document.getElementById("e-pytest").textContent   = ptMatch  ? ptMatch[1]  : "–";
+  document.getElementById("e-platform").textContent = detectPlatform(termText);
+  document.getElementById("e-exit").textContent     = data.exit_code === 0 ? "0 (OK)" : data.exit_code + " (FAIL)";
+
+  document.getElementById("summarySection").style.display = "block";
+
+  // Tabs
+  renderTabs(data.classes);
+  document.getElementById("tabsSection").style.display = "block";
+
+  // Cards
+  renderCards(data.classes);
+  document.getElementById("cardsSection").style.display = "block";
+
+  // Terminal
+  renderTerminal(data.terminal_output);
+  document.getElementById("terminalSection").style.display = "block";
+
+  // Auto-open first card
+  const firstHeader = document.querySelector(".tcc-header");
+  if (firstHeader) toggleCard(firstHeader, true);
+}
+
+// ── Render tabs ────────────────────────────────────────────────────────────────
+function renderTabs(classes) {
+  const total  = classes.reduce((s, c) => s + c.tests.length, 0);
+  const tabsEl = document.getElementById("classTabs");
+
+  tabsEl.innerHTML = `<button class="tab-btn active" data-class="all">Semua (${total})</button>`;
+  classes.forEach(c => {
+    tabsEl.insertAdjacentHTML("beforeend",
+      `<button class="tab-btn" data-class="${esc(c.class_name)}">${c.class_name.replace("Test","")}&nbsp;(${c.tests.length})</button>`);
+  });
+
+  tabsEl.addEventListener("click", e => {
+    const btn = e.target.closest(".tab-btn");
+    if (!btn) return;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const cls = btn.dataset.class;
+    document.querySelectorAll(".test-class-card").forEach(card => {
+      card.style.display = (cls === "all" || card.dataset.class === cls) ? "" : "none";
+    });
+  });
+}
+
+// ── Render class cards ─────────────────────────────────────────────────────────
+function renderCards(classes) {
+  const container = document.getElementById("cardsSection");
+  container.innerHTML = "";
+
+  classes.forEach(cls => {
+    const allPass = cls.failed === 0;
+    const badge   = allPass
+      ? `<span class="tcc-badge pass">${cls.passed} PASSED</span>`
+      : `<span class="tcc-badge fail">${cls.failed} FAILED · ${cls.passed} PASSED</span>`;
+
+    const card = document.createElement("div");
+    card.className = "test-class-card";
+    card.dataset.class = cls.class_name;
+
+    const classDescHtml = cls.class_desc
+      ? `<div class="tcc-desc">${esc(cls.class_desc.split("\n")[0])}</div>`
+      : "";
+
+    card.innerHTML = `
+      <div class="tcc-header" onclick="toggleCard(this)">
+        <div class="tcc-left">
+          ${badge}
+          <div>
+            <div class="tcc-name">${esc(cls.class_name)}</div>
+            ${classDescHtml}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="tcc-count">${cls.tests.length} tests</span>
+          <span class="tcc-arrow">▼</span>
+        </div>
+      </div>
+      <div class="tcc-body">
+        ${cls.tests.map(t => renderTestRow(t)).join("")}
+      </div>`;
+
+    container.appendChild(card);
+  });
+}
+
+// ── Render satu test row ───────────────────────────────────────────────────────
+function renderTestRow(t) {
+  const pass  = t.outcome === "passed";
+  const icon  = pass ? "✓" : "✗";
+  const cls   = pass ? "pass" : "fail";
+  const errHtml = (!pass && t.error_msg)
+    ? `<div class="tr-error">${esc(t.error_msg)}</div>`
+    : "";
+
+  // Format nama test: hapus "test_" prefix dan ganti _ dengan spasi untuk display
+  const displayName = t.test_name;
+
+  // Input & expected
+  const inputHtml = t.input && t.input !== "–"
+    ? `<span class="lbl">Input</span><span class="val">${esc(t.input)}</span>`
+    : "";
+  const expHtml = t.expected && t.expected !== "–"
+    ? `<span class="lbl">Expected</span><span class="exp">${esc(t.expected)}</span>`
+    : "";
+
+  return `
+    <div class="test-row">
+      <div class="tr-icon ${cls}">${icon}</div>
+      <div class="tr-name">
+        ${esc(displayName)}
+        <small>${esc(t.desc || "")}</small>
+      </div>
+      <div class="tr-detail">
+        ${inputHtml}
+        ${expHtml}
+      </div>
+      <div class="tr-dur">${t.duration_ms}ms</div>
+      <div class="tr-status ${cls}">${t.outcome.toUpperCase()}</div>
+      ${errHtml}
+    </div>`;
+}
+
+// ── Render terminal output ─────────────────────────────────────────────────────
+function renderTerminal(raw) {
+  const el = document.getElementById("terminalOut");
+  // Colorize
+  const html = esc(raw)
+    .replace(/\bPASSED\b/g, '<span class="t-pass">PASSED</span>')
+    .replace(/\bFAILED\b/g, '<span class="t-fail">FAILED</span>')
+    .replace(/\bERROR\b/g,  '<span class="t-fail">ERROR</span>')
+    .replace(/\bWARNING\b/g,'<span class="t-warn">WARNING</span>')
+    .replace(/(=+\s+\d+\s+passed.*)/g, '<span class="t-pass">$1</span>')
+    .replace(/(=+\s+.*failed.*)/g,     '<span class="t-fail">$1</span>');
+  el.innerHTML = html;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── Toggle card ────────────────────────────────────────────────────────────────
+function toggleCard(header, forceOpen) {
+  const body = header.nextElementSibling;
+  const open = forceOpen !== undefined ? forceOpen : !body.classList.contains("open");
+  body.classList.toggle("open", open);
+  header.classList.toggle("open", open);
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function detectPlatform(text) {
+  if (/windows/i.test(text)) return "Windows";
+  if (/linux/i.test(text))   return "Linux";
+  if (/darwin|macos|mac os/i.test(text)) return "macOS";
+  // Try from user agent fallback
+  const ua = navigator.userAgent;
+  if (/Win/.test(ua)) return "Windows";
+  if (/Mac/.test(ua)) return "macOS";
+  if (/Linux/.test(ua)) return "Linux";
+  return "–";
+}
+
+function detectPythonVersion(text) {
+  const m = text.match(/(\d+\.\d+\.\d+)/);
+  return m ? m[1] : "–";
+}
+</script>
+</body>
+</html>
