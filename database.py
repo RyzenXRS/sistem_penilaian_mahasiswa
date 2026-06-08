@@ -6,7 +6,7 @@ DB_CONFIG = {
     "host": "localhost",
     "port": 3306,
     "user": "root",
-    "password": "",           # Laragon default
+    "password": "",           
     "database": "nilai_mahasiswa",
     "charset": "utf8mb4",
 }

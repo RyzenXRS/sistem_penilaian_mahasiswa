@@ -1,8 +1,3 @@
-"""
-app.py – Entry point aplikasi web Flask
-Sistem Penilaian Mahasiswa Otomatis – Grade UNEJ
-"""
-
 import os
 import ast
 import json
@@ -97,16 +92,6 @@ def testing():
 
 # ─── Helper: parse test file untuk ambil metadata tiap test ─────────────────
 def _parse_test_metadata(test_file_path: str) -> dict:
-    """
-    Membaca file test dengan AST dan mengekstrak:
-    - docstring class
-    - nama method
-    - docstring method (jika ada)
-    - source code method (untuk deskripsi fallback)
-
-    Returns:
-        dict: { "ClassName::test_name": {"desc": str, "class_desc": str, "source": str} }
-    """
     meta = {}
     try:
         with open(test_file_path, "r", encoding="utf-8") as f:
@@ -146,10 +131,6 @@ def _parse_test_metadata(test_file_path: str) -> dict:
 
 
 def _infer_desc_from_source(method_name: str, source: str) -> str:
-    """
-    Inferensikan deskripsi singkat dari nama method & source kode.
-    Dipakai jika tidak ada docstring.
-    """
     # Bersihkan nama method jadi kalimat
     name = method_name.replace("test_", "").replace("_", " ")
 
@@ -163,10 +144,6 @@ def _infer_desc_from_source(method_name: str, source: str) -> str:
 
 
 def _infer_input_expected(method_name: str, source: str) -> tuple:
-    """
-    Ekstrak input & expected dari source kode secara heuristik.
-    Returns (input_str, expected_str)
-    """
     lines = [l.strip() for l in source.splitlines()]
 
     # Cari assert lines
@@ -238,7 +215,7 @@ def _infer_input_expected(method_name: str, source: str) -> tuple:
     return input_str, expected_str
 
 
-# ─── Endpoint: jalankan pytest secara programatik ───────────────────────────
+# ─── Endpoint ───────────────────────────
 @app.route("/testing/run", methods=["POST"])
 def run_tests():
     try:

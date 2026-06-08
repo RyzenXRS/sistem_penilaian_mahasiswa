@@ -292,8 +292,6 @@ class TestRemedial:
 # ─── 6. TestProsesMahasiswa (end-to-end) ─────────────────────────────────────
 
 class TestProsesMahasiswa:
-    # End-to-end Decision Table Testing untuk semua 9 rule grade
-
     def test_R1_grade_A(self):
         data = buat_input(90, 90, 90, 90, 90, 90)
         data["nim"] = "231001"; data["nama"] = "Mahasiswa A"
