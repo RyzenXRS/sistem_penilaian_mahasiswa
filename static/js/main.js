@@ -23,6 +23,20 @@ const GRADE_COLORS = {
 
 const NILAI_FIELDS = ["tugas", "kuis", "keaktifan", "kehadiran", "uts", "uas"];
 
+document.querySelectorAll('input[type="number"]').forEach(function(input) {
+  // 1. Mencegah pengetikan tombol titik, koma, e, E, plus, dan minus
+  input.addEventListener('keydown', function(e) {
+    if (['.', ',', 'e', 'E', '+', '-'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
+
+  input.addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+});
+// =========================================================================
+
 function validasiKlien() {
   const errors = [];
   const highlights = [];
