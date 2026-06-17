@@ -31,16 +31,19 @@ def hitung_nilai():
         nim  = request.form.get("nim",  "").strip()
         nama = request.form.get("nama", "").strip()
         errors = []
-        
+            
         if not nim:  
             errors.append("NIM tidak boleh kosong.")
         elif not re.match(r"^\d+$", nim):
-            errors.append("NIM hanya boleh berisi angka, tidak boleh ada spasi atau karakter lain.")
-
+            errors.append("NIM hanya boleh berisi angka.")
+            
         if not nama: 
             errors.append("Nama tidak boleh kosong.")
+        # UBAH BARIS DI BAWAH INI
         elif not re.match(r"^[A-Za-z\s\.\']+$", nama):
             errors.append("Nama mengandung karakter spesial yang tidak diizinkan.")
+        if errors:
+            raise ValueError(errors)
 
         nilai_fields = {}
         for field in ["tugas", "kuis", "keaktifan", "kehadiran", "uts", "uas"]:

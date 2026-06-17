@@ -23,6 +23,14 @@ const GRADE_COLORS = {
 
 const NILAI_FIELDS = ["tugas", "kuis", "keaktifan", "kehadiran", "uts", "uas"];
 
+document.getElementById("nim").addEventListener("input", function(e) {
+  this.value = this.value.replace(/[^0-9]/g, "");
+});
+
+document.getElementById("nama").addEventListener("input", function(e) {
+  this.value = this.value.replace(/[^A-Za-z\s\.\']/g, "");
+});
+
 document.querySelectorAll('input[type="number"]').forEach(function(input) {
   input.addEventListener('keydown', function(e) {
     if (['e', 'E', '+', '-', ','].includes(e.key)) {
@@ -41,9 +49,26 @@ function validasiKlien() {
   const highlights = [];
   const nim  = document.getElementById("nim").value.trim();
   const nama = document.getElementById("nama").value.trim();
-  if (!nim)  { errors.push("NIM tidak boleh kosong.");  highlights.push("nim"); }
-  if (!nama) { errors.push("Nama tidak boleh kosong."); highlights.push("nama"); }
+  
+  // Validasi NIM Klien
+  const nimRegex = /^\d+$/;
+  if (!nim) { 
+    errors.push("NIM tidak boleh kosong.");  
+    highlights.push("nim"); 
+  } else if (!nimRegex.test(nim)) {
+    errors.push("NIM hanya boleh berisi angka.");  
+    highlights.push("nim"); 
+  }
 
+  // Validasi Nama Klien
+  const namaRegex = /^[A-Za-z\s\.\']+$/;
+  if (!nama) { 
+    errors.push("Nama tidak boleh kosong."); 
+    highlights.push("nama"); 
+  } else if (!namaRegex.test(nama)) {
+    errors.push("Nama tidak boleh mengandung angka atau karakter spesial."); 
+    highlights.push("nama"); 
+  }
   for (const field of NILAI_FIELDS) {
     const el  = document.getElementById(field);
     const raw = el.value.trim();
