@@ -1,4 +1,5 @@
 import math
+import re
 
 # ── Bobot Penilaian ───────────────────────────────────────────────────────────
 BOBOT_TUGAS     = 0.10
@@ -7,7 +8,7 @@ BOBOT_KEAKTIFAN = 0.05
 BOBOT_KEHADIRAN = 0.05
 BOBOT_UTS       = 0.30
 BOBOT_UAS       = 0.30
-
+ 
 assert abs((BOBOT_TUGAS + BOBOT_KUIS + BOBOT_KEAKTIFAN +
             BOBOT_KEHADIRAN + BOBOT_UTS + BOBOT_UAS) - 1.0) < 1e-9, \
     "Total bobot tidak sama dengan 1.0!"
@@ -107,8 +108,23 @@ def proses_mahasiswa(data: dict) -> dict:
 
     nim  = str(data["nim"]).strip()
     nama = str(data["nama"]).strip()
-    if not nim:  raise ValueError(["NIM tidak boleh kosong."])
-    if not nama: raise ValueError(["Nama tidak boleh kosong."])
+    
+    # Kumpulkan error dalam list agar bisa memunculkan semua pesan sekaligus
+    errors = []
+    
+    if not nim:  
+        errors.append("NIM tidak boleh kosong.")
+    elif not re.match(r"^\d+$", nim):
+        errors.append("NIM hanya boleh berisi angka.")
+        
+    if not nama: 
+        errors.append("Nama tidak boleh kosong.")
+    elif not re.match(r"^[A-Za-z\s]+$", nama):
+        errors.append("Nama hanya boleh berisi huruf dan spasi.")
+        
+    # Jika ada error pada nama atau nim, langsung lemparkan ValueError
+    if errors:
+        raise ValueError(errors)
 
     nilai_akhir = hitung_nilai_akhir(
         data["tugas"], data["kuis"], data["keaktifan"],

@@ -3,7 +3,7 @@ import ast
 import json
 import subprocess
 import sys
-
+import re
 from flask import Flask, render_template, request, jsonify
 from penilaian_mahasiswa import proses_mahasiswa, validasi_semua_nilai
 from database import init_db, simpan_penilaian, ambil_semua_penilaian, hapus_penilaian_by_id, hapus_semua_penilaian
@@ -31,8 +31,16 @@ def hitung_nilai():
         nim  = request.form.get("nim",  "").strip()
         nama = request.form.get("nama", "").strip()
         errors = []
-        if not nim:  errors.append("NIM tidak boleh kosong.")
-        if not nama: errors.append("Nama tidak boleh kosong.")
+        
+        if not nim:  
+            errors.append("NIM tidak boleh kosong.")
+        elif not re.match(r"^\d+$", nim):
+            errors.append("NIM hanya boleh berisi angka, tidak boleh ada spasi atau karakter lain.")
+
+        if not nama: 
+            errors.append("Nama tidak boleh kosong.")
+        elif not re.match(r"^[A-Za-z\s\.\']+$", nama):
+            errors.append("Nama mengandung karakter spesial yang tidak diizinkan.")
 
         nilai_fields = {}
         for field in ["tugas", "kuis", "keaktifan", "kehadiran", "uts", "uas"]:
