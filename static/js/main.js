@@ -24,16 +24,21 @@ const GRADE_COLORS = {
 const NILAI_FIELDS = ["tugas", "kuis", "keaktifan", "kehadiran", "uts", "uas"];
 
 document.querySelectorAll('input[type="number"]').forEach(function(input) {
-  // 1. Mencegah pengetikan tombol titik, koma, e, E, plus, dan minus
   input.addEventListener('keydown', function(e) {
-    if (['.', ',', 'e', 'E', '+', '-'].includes(e.key)) {
+    // 1. Blokir tombol e, E, plus (+), minus (-), dan koma (,)
+    if (['e', 'E', '+', '-', ','].includes(e.key)) {
+      e.preventDefault();
+    }
+    
+    // 2. Blokir titik HANYA jika form masih kosong (mencegah titik doang di awal)
+    // Jika sudah ada angka (misal "9"), maka titik akan diizinkan (menjadi "9.")
+    if (e.key === '.' && this.value === '') {
       e.preventDefault();
     }
   });
-
-  input.addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^0-9]/g, '');
-  });
+  
+  // Event 'input' (this.value = ...) dihapus total agar tidak bentrok 
+  // dengan bawaan type="number" yang menyebabkan kursor error.
 });
 // =========================================================================
 
